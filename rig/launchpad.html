@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mouse-65 launch replay</title>
+<style>
+  body{margin:0;background:#12181b;color:#e8eef1;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace;display:grid;place-items:center;min-height:100vh;padding:16px;box-sizing:border-box}
+  main{width:min(100%,960px)} canvas{width:100%;height:auto;background:#0e1417;border:1px solid #2b373d;display:block}
+  #log{white-space:pre-wrap;color:#94a3ab;margin-top:10px;min-height:3em} button{font:inherit;padding:6px 12px;margin-top:8px}
+</style></head><body><main>
+<canvas id="pad" width="1200" height="800" aria-label="Replay of the cursor path to the launch button"></canvas>
+<button id="again" type="button">Replay</button>
+<div id="log">Loading state/launch.json… (serve the repo root, or copy launch.json next to this file)</div>
+</main>
+<script>
+// Replays state/launch.json exactly as recorded. Nothing here decides anything.
+const cv = document.getElementById('pad'), g = cv.getContext('2d'), log = document.getElementById('log');
+let T = null, timer = null;
+async function load(){ for (const u of ['launch.json','../state/launch.json','../web/launch.json']) { try { const r = await fetch(u); if (r.ok) { T = await r.json(); return play(); } } catch(e){} } log.textContent = 'No launch.json found. Run `mousedev launch` first.'; }
+function draw(i){
+  const [bx,by,bw,bh] = T.button, s = T.steps[i];
+  g.clearRect(0,0,1200,800);
+  g.fillStyle = T.pressed && i === T.steps.length-1 ? '#3ccb86' : '#ffc62b'; g.fillRect(bx-bw/2,by-bh/2,bw,bh);
+  g.fillStyle = '#12181b'; g.font = 'bold 54px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('LAUNCH', bx, by);
+  g.strokeStyle = '#f0a3b5'; g.lineWidth = 3; g.beginPath();
+  T.steps.slice(0,i+1).forEach((p,k)=> k ? g.lineTo(...p.cursor) : g.moveTo(...p.cursor)); g.stroke();
+  const [x,y] = s.cursor; g.fillStyle='#fff'; g.beginPath(); g.moveTo(x,y); g.lineTo(x+22,y+26); g.lineTo(x+9,y+25); g.lineTo(x+2,y+38); g.closePath(); g.fill();
+  log.textContent = `${T.brain.source}${T.brain.shuffled?'':''} · ${T.brain.neurons.toLocaleString()} neurons · brain ${T.brain.sha256.slice(0,12)}\n`+
+    `step ${s.k+1}/${T.steps.length} · cursor ${s.cursor.join(', ')} · centre patches ${s.centre_hz} Hz · ${s.on_button?'on the button':'off the button'}\n`+
+    (i===T.steps.length-1 ? (T.pressed ? `Pressed. ${T.mint ? 'Mint '+T.mint : ''}` : 'Never settled on the button. Nothing was launched.') : '')+
+    `\nName, ticker and picture typed by the rig: ${T.operator_supplied.name} / ${T.operator_supplied.symbol}`;
+}
+function play(){ clearInterval(timer); let i = 0; draw(0); timer = setInterval(()=>{ if (++i >= T.steps.length) return clearInterval(timer); draw(i); }, 450); }
+document.getElementById('again').onclick = ()=> T && play();
+load();
+</script></body></html>
