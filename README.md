@@ -6,7 +6,7 @@
 synapse by the [MICrONS](https://www.microns-explorer.org/cortical-mm3) project and
 simulated here from that public map. It runs a pump.fun coin:
 
-1. Wallets that hold at least 0.2 SOL worth of the coin can get a cheese. Each round seven
+1. Wallets that hold $MIFTR coin can get a cheese. Each round seven
    of them are drawn for the table, one cheese each.
 2. A round lasts 10 to 15 minutes. At its end creator fees are claimed and all of them go
    into a pot for holders (`holder_share`, 1.0 by default).
