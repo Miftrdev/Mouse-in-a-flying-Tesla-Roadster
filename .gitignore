@@ -1,0 +1,11 @@
+.env
+config.toml
+data/*.npz
+data/*.csv*
+data/calibration.json
+state/
+web/state.json
+web/brain_points.json
+__pycache__/
+*.egg-info/
+.pytest_cache/

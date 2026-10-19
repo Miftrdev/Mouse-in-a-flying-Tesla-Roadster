@@ -1,0 +1,76 @@
+# Copy to config.toml. Every number that shapes a decision lives in this file and is
+# snapshotted into each decision record, so anyone can replay a decision exactly.
+
+[brain]
+connectome   = "data/connectome.npz"   # built by scripts/fetch_microns.py, not in the repo
+dt_ms        = 0.5
+sim_ms       = 1000.0     # one sniff = one second of simulated cortex; each cheese on the table gets one
+tau_m_ms     = 20.0
+tau_syn_ms   = 5.0
+v_rest       = -65.0
+v_th         = -50.0
+v_reset      = -65.0
+t_ref_ms     = 2.0
+delay_ms     = 1.5
+w_syn        = 0.25       # mV per synapse, one value for every synapse. `mousedev calibrate` sets it.
+inh_gain     = 1.0        # inhibitory synapse strength relative to excitatory. `mousedev calibrate` sets it.
+afferents    = 30         # input fibres per layer-4 cell (each fires at the rig's rate)
+w_in         = 1.0        # mV per input spike
+bg_hz        = 800.0      # summed background input to every neuron (e.g. 400 fibres x 2 Hz)
+bg_w         = 0.5
+
+[rig]
+grid_x          = 12      # the cortex sheet is cut into 12 x 8 columns = the mouse's "screen"
+grid_z          = 8
+slots_x         = 4       # the screen holds 4 x 2 = 8 places, one cheese (one holder's wallet) each
+slots_z         = 2
+input_types     = ["4P"]                      # layer 4: where the eyes' signal enters cortex
+output_types    = ["5P-ET"]                   # layer 5 ET: cortex's output to the body
+inhibitory_types = ["BC", "MC", "BPC", "NGC"]
+max_in_hz       = 160.0
+pick_min_frac   = 0.25    # a sniff only counts above this share of that place's calibrated rate
+# The rate of each place with its own cheese is measured on your brain file by `mousedev calibrate`.
+
+[reward]
+round_min_seconds = 600   # a round lasts between 10 and 15 minutes; the length is drawn with the round's seed
+round_max_seconds = 900
+table_size      = 7       # cheeses drawn for each round
+holder_share    = 1.00    # this share of each round's creator fees goes to the holder (1.00 = all of it); the rest stays in the wallet
+min_hold_sol    = 0.2     # a wallet gets a cheese only while its coins are worth at least this many SOL
+reserve_sol     = 0.05    # never paid out: pays transaction fees
+min_reward_sol  = 0.001   # a pot smaller than this waits for the next round
+exclude         = []      # wallets that never get a cheese, e.g. your own other wallets
+
+[chain]
+dry_run      = true       # paper mode. Nothing is signed or sent until you set this to false.
+mint         = ""         # filled in by `mousedev launch`, or paste an existing coin
+pool         = "auto"
+slippage_pct = 12         # for the first buy at launch; the bot never trades after that
+priority_fee = 0.0002
+
+[token]                    # supplied by the operator. The brain does not choose these.
+name         = "mouse dev"
+symbol       = "MOUSE"
+description  = "A cubic millimetre of real mouse brain is the dev."
+image        = "assets/coin.png"
+metadata_uri = ""          # set this to skip the Pinata upload
+twitter      = ""
+telegram     = ""
+website      = ""
+dev_buy_min_sol = 0.1     # the mouse picks the dev buy inside this range:
+dev_buy_sol  = 0.5        # a harder press on LAUNCH buys more
+
+[post]
+telegram_chat = ""         # e.g. "@yourchannel"
+x_enabled     = false
+
+[launch]                   # cursor rig used once, by `mousedev launch`
+grid_x    = 6              # a coarser screen for steering: 6 x 4 patches of cortex
+grid_z    = 4
+fov       = 1.25
+button_w  = 420
+button_h  = 300
+press_frac = 0.5           # press above this share of the on-button rate; 3 steps running = click
+step_ms   = 200.0          # calibration lengthens this if 200 ms is too short to measure
+max_steps = 80
+gain      = 0.7
